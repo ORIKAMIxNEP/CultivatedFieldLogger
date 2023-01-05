@@ -4,7 +4,7 @@ void HandleDownload() {
   WriteFile();
   File file = SPIFFS.open("/log.csv", "r");
   if (!file) {
-    Serial.println("Failed to open file");
+    Serial.println("Failed to open file\n");
     return;
   }
 
@@ -16,7 +16,10 @@ void HandleDownload() {
   Serial.println("Download completed\n");
 
   i = 0, j = 0;
-  hasCapacity = true;
+  if (!hasCapacity) {
+    count = 0;
+    hasCapacity = true;
+  }
 }
 
 void HandleNotFound() {

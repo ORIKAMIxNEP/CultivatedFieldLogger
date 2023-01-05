@@ -2,14 +2,15 @@
 #include <WebServer.h>
 #include "SPIFFS.h"
 
-const uint8_t logDays = 1, logRate = 3;
+const uint8_t logDays = 14, logRate = 144;
 int16_t temperatureData[logDays][logRate];
 int8_t humidityData[logDays][logRate];
 uint8_t soilHumidityData[logDays][logRate];
 uint16_t insolationData[logDays][logRate];
 uint8_t i = 0, j = 0;
 bool hasCapacity = true;
-uint32_t count = 0;
+uint32_t startTime;
+uint16_t count = 0;
 
 WebServer server(80);
 
@@ -50,25 +51,26 @@ void setup() {
       humidityData[i][j] = -1;
     }
   }
+  startTime = millis();
 }
 
 void loop() {
-  server.handleClient();
-  delay(1000);
+  while (millis() - startTime < 1000);
+  startTime = millis();
 
-  if (hasCapacity && count == 24 * 60 * 60 / logRate / 60) {
+  server.handleClient();
+  count++;
+  if (hasCapacity && count == 24 * 60 * 60 / logRate) {
     MeasureData();
     j++;
     count = 0;
     if (j == logRate) {
+      j = 0;
+      i++;
       if (i == logDays) {
         hasCapacity = false;
-        i = 0;
-        Serial.println("No free space for variable");
+        Serial.println("No free space for variable\n");
       }
-      i++;
-      j = 0;
     }
   }
-  count++;
 }
